@@ -1,30 +1,49 @@
 //node program that cpatures local performance data and sends it up to the socket.io server
 
 const os = require('os');
-const cpus = os.cpus();
-// - CPU Load (Current)
-// - Memory Usage
-//     - free
-const freeMem = os.freemem();
-//     - total
-const totalMem = os.totalmem();
-const usedMem = totalMem - freeMem;
-const memUsage = Math.floor((usedMem / totalMem) * 100) / 100;
 
-// - OS Type
-const osType = os.type() == 'Darwin' ? 'Mac' : os.type();
+const performanceData = () => {
+  return new Promise(async (resolve, reject) => {
+    const cpus = os.cpus();
+    // - CPU Load (Current)
+    // - Memory Usage
+    //     - free
+    const freeMem = os.freemem();
+    //     - total
+    const totalMem = os.totalmem();
+    const usedMem = totalMem - freeMem;
+    const memUsage = Math.floor((usedMem / totalMem) * 100) / 100;
 
-// - UP Time
-const upTime = os.uptime();
+    // - OS Type
+    const osType = os.type() == 'Darwin' ? 'Mac' : os.type();
 
-// - CPU Info
-//     - Type
-const cpuModel = cpus[0].model;
-//     - Number of Cores
-const numCores = cpus.length;
-//     - Clock Speed
-const cpuSpeed = cpus[0].speed;
+    // - UP Time
+    const upTime = os.uptime();
 
+    // - CPU Info
+    //     - Type
+    const cpuModel = cpus[0].model;
+    //     - Number of Cores
+    const numCores = cpus.length;
+    //     - Clock Speed
+    const cpuSpeed = cpus[0].speed;
+
+    const cpuLoad = await getCpuLoad();
+
+    resolve({
+      freeMem,
+      totalMem,
+      usedMem,
+      memUsage,
+      osType,
+      upTime,
+      cpuModel,
+      numCores,
+      cpuSpeed,
+      cpuLoad,
+    });
+  });
+};
 //cpus is all numcores, we need the average of all the cores which will give us the cpu average
 
 const cpuAverage = () => {
@@ -46,27 +65,23 @@ const cpuAverage = () => {
   };
 };
 
-let x = cpuAverage();
-
 //because the times property is time since boot; we will get now times, and 100ms from now times. Compare them, that will give us current load
 
 const getCpuLoad = () => {
-  const start = cpuAverage();
-  setTimeout(() => {
-    const end = cpuAverage();
-    const idleDifference = end.idle - start.idle;
-    const totalDifference = end.total - start.total;
-    // console.log(idleDifference, totalDifference);
-    //calculate the perctenage of used CPU
-    const percentageCpu =
-      100 - Math.floor((100 * idleDifference) / totalDifference);
+  return new Promise((resolve, reject) => {
+    const start = cpuAverage();
+    setTimeout(() => {
+      const end = cpuAverage();
+      const idleDifference = end.idle - start.idle;
+      const totalDifference = end.total - start.total;
+      // console.log(idleDifference, totalDifference);
+      //calculate the perctenage of used CPU
+      const percentageCpu =
+        100 - Math.floor((100 * idleDifference) / totalDifference);
 
-    console.log(percentageCpu);
-  }, 100);
+      resolve(percentageCpu);
+    }, 100);
+  });
 };
 
-setInterval(() => {
-  getCpuLoad();
-}, 1000);
-
-getCpuLoad();
+performanceData().then((allPerformanceData) => console.log(allPerformanceData));
