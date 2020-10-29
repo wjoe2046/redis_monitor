@@ -14,7 +14,7 @@ const cluster = require('cluster');
 const net = require('net');
 const socketio = require('socket.io');
 // const helmet = require('helmet')
-const socketMain = require('./socketMain');
+const sockets = require('./sockets');
 // const expressMain = require('./expressMain');
 
 const port = 8181;
@@ -93,9 +93,10 @@ if (cluster.isMaster) {
   // Here you might use Socket.IO middleware for authorization etc.
   // on connection, send the socket over to our module with socket stuff
   io.on('connection', function (socket) {
-    socketMain(io, socket);
+    sockets(io, socket);
     console.log(`connected to worker: ${cluster.worker.id}`);
   });
+  sockets(io, null);
 
   // Listen to messages sent from the master. Ignore everything else.
   process.on('message', function (message, connection) {
