@@ -18,6 +18,11 @@ socket.on('connect', () => {
   //client auth with single key value
   socket.emit('clientAuth', '552251zwf');
 
+  performanceData().then((allPerformanceData) => {
+    allPerformanceData.macA = macA;
+    socket.emit('initPerfData', allPerformanceData);
+  });
+
   let perfDataInterval = setInterval(() => {
     performanceData().then((allPerformanceData) =>
       // console.log(allPerformanceData)
