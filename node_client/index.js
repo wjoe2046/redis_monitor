@@ -24,6 +24,10 @@ socket.on('connect', () => {
       socket.emit('perfData', allPerformanceData)
     );
   }, 1000);
+
+  socket.on('disconnected', () => {
+    clearInterval(perfDataInterval);
+  });
 });
 
 const performanceData = () => {
