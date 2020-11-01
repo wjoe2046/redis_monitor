@@ -6,6 +6,24 @@ let socket = io('http://127.0.0.1:8181');
 
 socket.on('connect', () => {
   console.log(' I connected to socket server');
+  //need a way to identify this machine to whomever is concerned
+  const nI = os.networkInterfaces();
+  let macA;
+  for (let key in nI) {
+    if (!nI[key][0].internal) {
+      macA = nI[key][0].mac;
+      break;
+    }
+  }
+  //client auth with single key value
+  socket.emit('clientAuth', '552251zwf');
+
+  let perfDataInterval = setInterval(() => {
+    performanceData().then((allPerformanceData) =>
+      // console.log(allPerformanceData)
+      socket.emit('perfData', allPerformanceData)
+    );
+  }, 1000);
 });
 
 const performanceData = () => {
@@ -89,5 +107,3 @@ const getCpuLoad = () => {
     }, 100);
   });
 };
-
-performanceData().then((allPerformanceData) => console.log(allPerformanceData));
