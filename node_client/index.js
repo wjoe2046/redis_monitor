@@ -8,6 +8,7 @@ socket.on('connect', () => {
   console.log(' I connected to socket server');
   //need a way to identify this machine to whomever is concerned
   const nI = os.networkInterfaces();
+  console.log(nI);
   let macA;
   for (let key in nI) {
     if (!nI[key][0].internal) {
